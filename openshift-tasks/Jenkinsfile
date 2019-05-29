@@ -68,13 +68,13 @@ podTemplate(
 
     //Using Maven call SonarQube for Code Analysis
     stage('Code Analysis') {
-      steps {
-        echo "Code Analysis"
-        script {
-          echo "Running Code Analysis"
-          sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
-        }
-      }
+      // steps {
+      //   echo "Code Analysis"
+      //   script {
+      //     echo "Running Code Analysis"
+      //     sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      //   }
+      // }
     }
 
       // Publish the built war file to Nexus
