@@ -6,7 +6,7 @@ podTemplate(
   containers: [
     containerTemplate(
       name: "jnlp",
-      image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-agent-appdev",
+      image: "docker-registry.default.svc:5000/7af9-jenkins/jenkins-agent-appdev",
       resourceRequestMemory: "1Gi",
       resourceLimitMemory: "2Gi",
       resourceRequestCpu: "1",
@@ -87,7 +87,7 @@ podTemplate(
            script {
              openshift.withCluster() {
                openshift.withProject("${devProject}") {
-                 openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${devProject}/tasks:${devTag}")
+                 openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/7af9-tasks-dev/tasks:${devTag}")
 
                  // Update the Config Map which contains the users for the Tasks application
                  // (just in case the properties files changed in the latest commit)
@@ -118,7 +118,7 @@ podTemplate(
         steps {
           echo "Copy image to Nexus Docker registry"
           script {
-            sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${devProject}/tasks:${devTag} docker://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
+            sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/7af9-tasks-dev/tasks:${devTag} docker://nexus-registry.gpte-hw-cicd.svc.cluster.local:5000/tasks:${devTag}"
             // Tag the built image with the production tag.
             openshift.withCluster() {
               openshift.withProject("${prodProject}") {
@@ -149,7 +149,7 @@ podTemplate(
 
                 // Update the Image on the Production Deployment Config
                 def dc = openshift.selector("dc/${destApp}").object()
-                dc.spec.template.spec.containers[0].image="docker-registry.default.svc:5000/${devProject}/tasks:${prodTag}"
+                dc.spec.template.spec.containers[0].image="docker-registry.default.svc:5000/7af9-tasks-dev/tasks:${prodTag}"
                 openshift.apply(dc)
 
                 // Update Config Map in change config files changed in the source
