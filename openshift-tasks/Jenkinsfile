@@ -47,29 +47,34 @@ podTemplate(
       // Using Maven run the unit tests
       stage('Unit Tests') {
         echo "Running Unit Tests"
-
-        // TBD: Execute Unit Tests
+        sh "${mvnCmd} test"
       }
 
       // Using Maven to call SonarQube for Code Analysis
       stage('Code Analysis') {
         echo "Running Code Analysis"
-
-        // TBD: Execute Sonarqube Tests
+        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube.gpte-hw-cicd.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"      
       }
 
       // Publish the built war file to Nexus
       stage('Publish to Nexus') {
         echo "Publish to Nexus"
-
-        // TBD: Publish to Nexus
+        sh "${mvnCmd} clean deploy -e -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3.gpte-hw-cicd.svc.cluster.local:8081/repository/releases"
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
       stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
-
-        // TBD: Build Image, tag Image
+        steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${devProject}") {
+              openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
+              openshift.tag("tasks:latest", "tasks:${devTag}")
+              }
+            }
+          }
+        }
       }
 
       // Deploy the built image to the Development Environment.
