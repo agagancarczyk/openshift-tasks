@@ -65,14 +65,8 @@ podTemplate(
       // Build the OpenShift Image in OpenShift and tag it.
       stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
-        script {
-          openshift.withCluster() {
-            openshift.withProject("7af9-tasks-dev") {
-              openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
-              openshift.tag("tasks:latest", "tasks:${devTag}")
-            }
-          }
-        }
+        sh('oc start-build tasks --follow --from-file=./target/openshift-tasks.war -n 7af9-tasks-dev')
+        openshiftTag alias: 'false', destStream: 'tasks', destTag: devTag, destinationNamespace: '7af9-tasks-dev', namespace: '7af9-tasks-dev', srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
       }
 
       // Deploy the built image to the Development Environment.
