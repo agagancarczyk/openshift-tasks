@@ -67,7 +67,7 @@ podTemplate(
         echo "Building OpenShift container image tasks:${devTag}"
         script {
           openshift.withCluster() {
-            openshift.withProject("${devProject}") {
+            openshift.withProject("7af9-tasks-dev") {
               openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
               openshift.tag("tasks:latest", "tasks:${devTag}")
             }
