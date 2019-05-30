@@ -65,7 +65,7 @@ podTemplate(
       // Build the OpenShift Image in OpenShift and tag it.
       stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
-        sh('oc policy add-role-to-group edit system:serviceaccount:7af9-jenkins:jenkins -n 7af9-tasks-dev')
+        sh('oc policy add-role-to-group edit system:serviceaccount:7af9-jenkins:jenkins')
         sh('oc start-build tasks --follow --from-file=./target/openshift-tasks.war -n 7af9-tasks-dev')
       }
 
