@@ -95,10 +95,28 @@ podTemplate(
       def activeApp = ""
 
       stage('Blue/Green Production Deployment') {
-        // TBD: Determine which application is active
-        //      Set Image, Set VERSION
-        //      Deploy into the other application
-        //      Make sure the application is running and ready before proceeding
+         activeApp = sh(returnStdout: true, script: "oc get route tasks -n 7af9-tasks-prod -o jsonpath='{ .spec.to.name }'").trim()
+      
+           if (activeApp == "tasks-green") {
+            destApp = "tasks-blue"
+          }
+          if (activeApp == "tasks-blue") {
+            destApp = "tasks-green"
+          }
+
+          echo "Active Application:      " + activeApp
+          echo "Destination Application: " + destApp
+        
+          sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/7af9-tasks-dev/tasks:${prodTag} -n 7af9-tasks-prod"
+        
+          sh "oc delete configmap ${destApp}-config -n 7af9-tasks-prod --ignore-not-found=true"
+          sh "oc create configmap ${destApp}-config --from-literal=VERSION='${prodTag} (${destApp})' --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n 7af9-tasks-prod"
+        
+          sh "oc set env dc/${destApp} VERSION='${prodTag} (${destApp})' -n 7af9-tasks-prod" 
+          
+          openshiftDeploy depCfg: destApp, namespace: '7af9-tasks-prod', verbose: 'true', waitTime: '', waitUnit: 'sec'
+          openshiftVerifyDeployment depCfg: destApp, namespace: '7af9-tasks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+          openshiftVerifyService namespace: '7af9-tasks-prod', svcName: destApp, verbose: 'true'
       }
 
       stage('Switch over to new Version') {
