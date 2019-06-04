@@ -15,7 +15,7 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 oc new-project ${GUID}-jenkins 
 
 # Set up Jenkins with sufficient resources
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n ${GUID}-jenkins
+oc new-app jenkins-persistent --param ENABLE_OAUTH=false --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param DISABLE_ADMINISTRATIVE_MONITORS=true -n ${GUID}-jenkins
   
 # Create custom agent container image with skopeo
 oc new-build --name="jenkins-agent-appdev" -e GUID=${GUID} -e REPO="${REPO}" -e CLUSTER="${CLUSTER}" -D $'FROM docker.io/openshift/jenkins-agent-maven-35-centos7:v3.11\n 
